@@ -21,11 +21,6 @@ There are no encoded or encrypted files, everything is fully readable and open f
 > Built on the latest **Baileys** [@whiskeysockets/baileys 7.0.0-rc.2](https://www.npmjs.com/package/@whiskeysockets/baileys#starting-socket-with-pairing-code) – see [Migration Guide (v7.x.x)](https://baileys.wiki/docs/migration/to-v7.0.0/).  
   
 ---
-> [!WARNING]  
-> ⚠️ Not supporting **custom pairing** and **buttons**, since this project uses the official Baileys.  
-> 💡 You can still modify it yourself using a **Baileys mod** if needed.  
-
----
 > [!TIP]  
 > This is a **base WhatsApp bot**, it comes with **no features by default**.  
 > - Example command: [`command/case.ts`](https://github.com/rrykarlsefni/inouets/blob/master/command/case.ts)  
@@ -38,6 +33,12 @@ There are no encoded or encrypted files, everything is fully readable and open f
 > Updates will be released when there’s time and opportunity.
 
 ---
+
+---
+> [!WARNING]  
+> ⚠️ Not supporting **custom pairing** and **buttons**, since this project uses the official Baileys.  
+> 💡 You can still modify it yourself using a **Baileys mod** if needed.  
+
 
 ## Disclaimer
 > [!CAUTION]  
@@ -77,7 +78,7 @@ m.sender //jid user yang meng command (m.key.participant)
 m.pushName //untuk mendapatkan nama pengirim 
 m.download() / m.quoted.download() //mendownload media
 ```
-## Example kirim pesan
+## Example send message
 ```js
 // Send a regular message
 await rrykarl.sendMessage(m.chat, {
