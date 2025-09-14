@@ -17,7 +17,7 @@ There are no encoded or encrypted files, everything is fully readable and open f
 
 ---
 > [!NOTE]  
-> **Simple WhatsApp Bot** using **TypeScript (ESM)** with case command handler.  
+> **Simple WhatsApp Bot** using **TypeScript (ESM)** with case command handler.
 > Built on the latest **Baileys** [@whiskeysockets/baileys 7.0.0-rc.2](https://www.npmjs.com/package/@whiskeysockets/baileys#starting-socket-with-pairing-code) – see [Migration Guide (v7.x.x)](https://baileys.wiki/docs/migration/to-v7.0.0/).  
   
 ---
