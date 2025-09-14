@@ -1,4 +1,19 @@
+---
 # inouets (BETA TEST)
+
+---
+## License
+
+This project is licensed under the [MIT License](./LICENSE).  
+Versi terjemahan dalam bahasa Indonesia beserta tambahan klausul dapat dilihat di [LICENSE-ID](./LICENSE-ID).
+---
+
+## Open Source
+
+The **inouets** project is fully **open source** and **not encrypted (no enc)**.  
+You are free to study, modify, and use this source code under the MIT license.  
+
+There are no encoded or encrypted files, everything is fully readable and open for development.
 
 ---
 > [!NOTE]  
@@ -29,12 +44,14 @@
 > If you obtained this source code **from anywhere other than the official repository**  
 > 👉 [https://github.com/rrykarlsefni/inouets](https://github.com/rrykarlsefni/inouets)  
 > it is most likely **modified by a third party**.  
-
-I am **not responsible** for any bugs, errors, data loss, or issues that may occur from using a modified version.  
+> I am **not responsible** for any bugs, errors, data loss, or issues that may occur from using a modified version.  
 Please use only the official repository to get proper updates and support.
 
 > [!WARNING]  
 > found a bug? report it to [issue](https://github.com/rrykarlsefni/inouets/issues)
+> need a panel? [inouehost.my.id](https://inouehost.my.id) aja
+> in here [testimoni](https://whatsapp.com/channel/0029Vb6bvDpDzgTBYTRlev2g) 
+> free [sc/code bot](https://whatsapp.com/channel/0029Vb42ECFB4hdJNqSg9t3z)
 
 ---
 
@@ -62,19 +79,19 @@ m.pushName //untuk mendapatkan nama pengirim
 ```
 ## Example kirim pesan
 ```js
-// Kirim pesan biasa
+// Send a regular message
 await rrykarl.sendMessage(m.chat, {
   text: "hi"
 });
 ```
 ```js
-// Kirim pesan dengan quoted
+// Send message with quoted
 await rrykarl.sendMessage(m.chat, {
   text: "hi"
 }, {quoted: m});
 ```
 ```js
-// Cara cepat untuk membalas pesan
+// Quick way to reply to messages
 m.reply("hi");
 ```
 ---
@@ -137,5 +154,6 @@ $ npm install
 $ npm run pm2
 ```
 
-
+---
+## Thanks
 ---
