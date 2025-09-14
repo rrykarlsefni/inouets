@@ -45,3 +45,20 @@ export const config = {
     // isi "-" jika ingin mengkosongkan
   }
 };
+
+/**
+~> inouets - Simple WhatsApp Bot Base
+
+~> License : MIT (lihat LICENSE & LICENSE-ID)
+~> Repo    : https://github.com/rrykarlsefni/inouets
+
+~> Open source project (no enc)
+~> Feel free to use and modify with credit
+
+------------------------------------------
+~> Need panel?  https://inouehost.my.id
+~> Testimoni    https://whatsapp.com/channel/0029Vb6bvDpDzgTBYTRlev2g
+~> Chat admin   https://wa.me/6288802752781
+------------------------------------------
+~> Support the project by giving a ★ on GitHub!
+*/

@@ -1,26 +1,41 @@
 ---
 # inouets (BETA TEST)
 
+---
 > [!NOTE]  
 > **Simple WhatsApp Bot** using **TypeScript (ESM)** with case command handler.  
 > Built on the latest **Baileys** [@whiskeysockets/baileys 7.0.0-rc.2](https://www.npmjs.com/package/@whiskeysockets/baileys#starting-socket-with-pairing-code) – see [Migration Guide (v7.x.x)](https://baileys.wiki/docs/migration/to-v7.0.0/).  
   
+---
 > [!WARNING]  
 > ⚠️ Not supporting **custom pairing** and **buttons**, since this project uses the official Baileys.  
 > 💡 You can still modify it yourself using a **Baileys mod** if needed.  
- 
+
+---
 > [!TIP]  
 > This is a **base WhatsApp bot**, it comes with **no features by default**.  
 > - Example command: [`command/case.ts`](https://github.com/rrykarlsefni/inouets/blob/master/command/case.ts)  
 > - Configuration file: [`config/config.ts`](https://github.com/rrykarlsefni/inouets/blob/master/config/config.ts)  
 
+---
 > [!IMPORTANT]  
 > 🌟 This is the **initial base bot source code**.  
 > Give this repo a **star** ⭐ to support development.  
 > Updates will be released when there’s time and opportunity.
 
+---
+
+## Disclaimer
+> [!CAUTION]  
+> If you obtained this source code **from anywhere other than the official repository**  
+> 👉 [https://github.com/rrykarlsefni/inouets](https://github.com/rrykarlsefni/inouets)  
+> it is most likely **modified by a third party**.  
+
+I am **not responsible** for any bugs, errors, data loss, or issues that may occur from using a modified version.  
+Please use only the official repository to get proper updates and support.
+
 > [!WARNING]  
-> menemukan bug? laporkan ke [issue](https://github.com/rrykarlsefni/inouets/issues)
+> found a bug? report it to [issue](https://github.com/rrykarlsefni/inouets/issues)
 
 ---
 

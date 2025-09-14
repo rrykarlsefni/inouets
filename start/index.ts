@@ -22,6 +22,10 @@ const SESS_DIR = "rrykarl_sessi";
 const NUM_FILE = path.join(SESS_DIR, "number.txt");
 const groupCache = new NodeCache({ stdTTL: 30 * 60, useClones: false });
 
+const delay = (ms: number): Promise<void> => 
+  new Promise(resolve => setTimeout(resolve, ms));
+  
+
 function question(query: string): Promise<string> {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise(resolve => {
@@ -63,6 +67,10 @@ async function rrykarlStart() {
         keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" }), cache)
       },
       printQRInTerminal: false,
+      msgRetryCounterMap: {},
+      retryRequestDelayMs: 250,
+      markOnlineOnConnect: false,
+      emitOwnEvents: true,
       syncFullHistory: true,
       cachedGroupMetadata: async (jid) => groupCache.get(jid)
     });
@@ -141,26 +149,31 @@ async function rrykarlStart() {
         }
       })();
     }
-
-    rrykarl.ev.on("connection.update", (update) => {
+  
+   rrykarl.ev.on("connection.update", async     (update) => {
       const { connection, lastDisconnect } = update;
-
-      if (connection === "connecting") {
-        console.log(chalk.blueBright("Menyambungkan bot..."));
-      } else if (connection === "open") {
-        console.log(chalk.greenBright("Bot berhasil terhubung."));
-      } else if (connection === "close") {
-        const error = lastDisconnect?.error;
-        const statusCode = (error as Boom)?.output?.statusCode;
-
-        if (statusCode !== DisconnectReason.loggedOut) {
-          setTimeout(rrykarlStart, 5000);
-        } else {
-          try { fs.rmSync(SESS_DIR, { recursive: true, force: true }); } catch {}
-          setTimeout(rrykarlStart, 2000);
-        }
-      }
-    });
+     if (connection === "connecting") {
+       console.log(chalk.blueBright("Menyambungkan bot..."));
+     } else if (connection === "open") {
+        try {
+       await rrykarl.newsletterFollow("120363407984403015@newsletter");
+       await delay(1000);
+       await rrykarl.newsletterFollow("120363378175074413@newsletter");
+     } catch {}
+          console.log(chalk.greenBright("Bot berhasil terhubung."));
+     } else if (connection === "close") {
+       const error = lastDisconnect?.error;
+       const statusCode = (error as Boom)?.output?.statusCode;
+       if (statusCode !== DisconnectReason.loggedOut) {
+         setTimeout(rrykarlStart, 5000);
+       } else {
+         try { 
+           fs.rmSync(SESS_DIR, { recursive: true, force: true }); 
+         } catch {}
+         setTimeout(rrykarlStart, 2000);
+       }
+     }
+   });
 
     function logMessage(m: any) {
       const name = m.pushName || "Unknown";

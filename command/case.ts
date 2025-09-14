@@ -1,3 +1,9 @@
+/** 
+ ~> need panel? inouehost.my.id
+ ~> testi https://whatsapp.com/channel/0029Vb6bvDpDzgTBYTRlev2g
+ ~> chat wa.me/6288802752781
+ */ 
+ 
 import type { ExtendedMessage } from "../handle/types.ts";
 import { config } from "../config/config.ts";
 import { mess } from "../config/message.ts";
