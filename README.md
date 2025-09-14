@@ -4,20 +4,23 @@
 > [!NOTE]  
 > **Simple WhatsApp Bot** using **TypeScript (ESM)** with case command handler.  
 > Built on the latest **Baileys** [@whiskeysockets/baileys 7.0.0-rc.2](https://www.npmjs.com/package/@whiskeysockets/baileys#starting-socket-with-pairing-code) – see [Migration Guide (v7.x.x)](https://baileys.wiki/docs/migration/to-v7.0.0/).  
->  
+  
 > [!WARNING]  
 > ⚠️ Not supporting **custom pairing** and **buttons**, since this project uses the official Baileys.  
 > 💡 You can still modify it yourself using a **Baileys mod** if needed.  
->  
+ 
 > [!TIP]  
 > This is a **base WhatsApp bot**, it comes with **no features by default**.  
-> - Example command: [`command/case.ts`](https://raw.githubusercontent.com/USERNAME/REPO/main/command/case.ts)  
-> - Configuration file: [`config/config.ts`](https://raw.githubusercontent.com/USERNAME/REPO/main/config/config.ts)  
->  
+> - Example command: [`command/case.ts`](https://github.com/rrykarlsefni/inouets/blob/master/command/case.ts)  
+> - Configuration file: [`config/config.ts`](https://github.com/rrykarlsefni/inouets/blob/master/config/config.ts)  
+
 > [!IMPORTANT]  
 > 🌟 This is the **initial base bot source code**.  
 > Give this repo a **star** ⭐ to support development.  
 > Updates will be released when there’s time and opportunity.
+
+> [!WARNING]  
+> menemukan bug? laporkan ke [issue](https://github.com/rrykarlsefni/inouets/issues)
 
 ---
 
@@ -27,13 +30,12 @@
 - Includes **eval** & **exec** utilities  
 - Pairing code login support  
 - Auto-restart with **nodemon** & **PM2**  
-- Fixed LID
+- Fixed LID ( sept 2025)
 
 ---
 
 ## Covert Lid To Jid
-![covert](https://raw.githubusercontent.com/USERNAME/REPO/main/assets/preview1.jpg)  
-![eval](https://raw.githubusercontent.com/USERNAME/REPO/main/assets/preview2.jpg)
+![covert](https://cdn.jsdelivr.net/gh/rrykarlsefni/inouets@master/.temp/convert.jpg) 
 ---
 ## Example case
 ```js
