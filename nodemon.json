@@ -1,0 +1,23 @@
+{
+  "watch": ["start", "handle", "command", "config"],
+  "ext": "ts,json",
+  "ignore": [
+    "node_modules",
+    "rrykarl_sessi/**",
+    "*.session",
+    "*.log",
+    "*.sqlite",
+    "session.data.json",
+    "tmp/**",
+    ".cache/**",
+    "dist/**"
+  ],
+  "exec": "ts-node --esm start/index.ts",
+  "delay": "500",
+  "verbose": true,
+  "signal": "SIGUSR2",
+  "restartable": "rs",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}
