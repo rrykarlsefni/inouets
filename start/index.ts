@@ -14,7 +14,7 @@ import fs from "fs";
 import path from "path";
 import NodeCache from "node-cache";
 import { handleMessage } from "../handle/func.ts";
-import { runEval, evalPrefix } from "../handle/eval.ts";
+import { runEval, evalPrefix } from "../command/eval.ts";
 import { HandleCase } from "../command/case.ts";
 import { config } from "../config/config.ts";
 
@@ -119,9 +119,11 @@ async function rrykarlStart() {
         }
 
         if (jid.includes(":")) {
-          return await rrykarl.decodeJid(jid.split(":")[0] + "@s.whatsapp.net");
-        }
-
+     const base = jid.split(":")[0];
+     if (/^\d+$/.test(base)) {
+       return await rrykarl.decodeJid(base + "@s.whatsapp.net");
+     }
+   }
         if (/^\d+@\d+$/.test(jid)) {
           return jid.split("@")[0] + "@s.whatsapp.net";
         }
@@ -133,6 +135,12 @@ async function rrykarlStart() {
     };
 
     rrykarl.ev.on("creds.update", saveCreds);
+    
+    rrykarl.ev.on("lid-mapping.update",     
+    (update) => {
+     console.log("LID Mapping ditemukan:",update);
+   });
+
 
     if (!state.creds.registered) {
       (async () => {
@@ -149,6 +157,7 @@ async function rrykarlStart() {
         }
       })();
     }
+    
   
    rrykarl.ev.on("connection.update", async     (update) => {
       const { connection, lastDisconnect } = update;
@@ -233,7 +242,7 @@ async function rrykarlStart() {
     rrykarl.ev.on("chats.update", (updates) => {
       //console.log("Chats updated:", updates);
     });
-
+    
     rrykarl.ev.on("groups.update", async (updates) => {
       for (const update of updates) {
         if (update.id) {
@@ -262,26 +271,32 @@ async function rrykarlStart() {
     });
 
     setInterval(() => {
-      if (!fs.existsSync(SESS_DIR)) return;
+  if (!fs.existsSync(SESS_DIR)) return;
 
-      fs.readdir(SESS_DIR, (err, files) => {
-        if (err) return;
+  fs.readdir(SESS_DIR, (err, files) => {
+    if (err) return;
 
-        files.forEach(file => {
-          if (file !== "creds.json" && file !== "number.txt") {
-            const filePath = path.join(SESS_DIR, file);
+    files.forEach(file => {
+      if (
+        file === "creds.json" ||
+        file === "number.txt" ||
+        /^lid-mapping-.*\.json$/.test(file)
+      ) {
+        return;
+      }
 
-            fs.unlink(filePath, (err) => {
-              if (!err) {
-                //console.log("Deleted session file:", filePath);
-              } else {
-                console.error("Failed to delete:", filePath, err);
-              }
-            });
-          }
-        });
+      const filePath = path.join(SESS_DIR, file);
+
+      fs.unlink(filePath, (err) => {
+        if (!err) {
+          //console.log("Deleted session file:", filePath);
+        } else {
+          console.error("Failed to delete:", filePath, err);
+        }
       });
-    }, 20 * 60 * 1000);
+    });
+  });
+}, 20 * 60 * 1000);
 
   } catch (err) {
     setTimeout(rrykarlStart, 5000);
