@@ -1,11 +1,11 @@
 ---
-# inouets (BETA TEST)
+## inouets (BETA TEST)
 
 ---
 ## License
 
 This project is licensed under the [MIT License](./LICENSE).  
-Versi terjemahan dalam bahasa Indonesia beserta tambahan klausul dapat dilihat di [LICENSE-ID](./LICENSE-ID).
+Versi license custom, terjemahan dalam bahasa Indonesia beserta tambahan klausul dapat dilihat di [LICENSE-ID](./LICENSE-ID).
 ---
 
 ## Open Source
@@ -46,13 +46,13 @@ There are no encoded or encrypted files, everything is fully readable and open f
 > it is most likely **modified by a third party**.  
 > I am **not responsible** for any bugs, errors, data loss, or issues that may occur from using a modified version.  
 Please use only the official repository to get proper updates and support.
+> and in my case the script can run well, don't know if it works for you
 
 > [!WARNING]  
-> found a bug? report it to [issue](https://github.com/rrykarlsefni/inouets/issues)
-> need a panel? [inouehost.my.id](https://inouehost.my.id) aja
-> in here [testimoni](https://whatsapp.com/channel/0029Vb6bvDpDzgTBYTRlev2g) 
-> free [sc/code bot](https://whatsapp.com/channel/0029Vb42ECFB4hdJNqSg9t3z)
-
+> - Found a bug? Report it on [Issues](https://github.com/rrykarlsefni/inouets/issues)  
+> - Need a panel? Visit [inouehost.my.id](https://inouehost.my.id)  
+> - Testimonials: [WhatsApp Channel](https://whatsapp.com/channel/0029Vb6bvDpDzgTBYTRlev2g)  
+> - Free source/code bot: [WhatsApp Channel](https://whatsapp.com/channel/0029Vb42ECFB4hdJNqSg9t3z)
 ---
 
 ## Features
@@ -75,7 +75,7 @@ m.react() //react random dari config, gunakan m.react("😥") untuk react custom
 m.chat //jid pesan di mana bot di command(m.key.remoteJid)
 m.sender //jid user yang meng command (m.key.participant)
 m.pushName //untuk mendapatkan nama pengirim 
-> m.download() / m.quoted.download() //mendownload media
+m.download() / m.quoted.download() //mendownload media
 ```
 ## Example kirim pesan
 ```js
