@@ -4,7 +4,7 @@
   "description": "inouets",
   "type": "module",
   "readme": "README.md",
-  "license": "MIT"
+  "license": "MIT",
   "scripts": {
     "start": "ts-node --esm start/index.ts",
     "pm2": "pm2 start pm2.config.cjs && pm2 save && pm2 logs",
@@ -35,5 +35,5 @@
   },
   "bugs": {
     "url": "https://github.com/rrykarlsefni/inouets/issues"
-  },
+  }
 }
