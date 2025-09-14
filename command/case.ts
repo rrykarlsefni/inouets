@@ -7,7 +7,6 @@
 import type { ExtendedMessage } from "../handle/types.ts";
 import { config } from "../config/config.ts";
 import { mess } from "../config/message.ts";
-import { runEval } from "../handle/eval.ts";
 
 export async function HandleCase(rrykarl: any, m: ExtendedMessage, command: string) {
   switch (command) {
