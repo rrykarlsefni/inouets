@@ -5,7 +5,7 @@ import {
 } from "@whiskeysockets/baileys";
 import type { ExtendedMessage } from "./types.ts";
 import { config } from "../config/config.ts";
-import { getProfile } from "./buffer.ts";
+import { getBuffer, getProfile } from "./buffer.ts";
 
 function normalizeMediaType(mtype?: string) {
   if (!mtype) return;
@@ -194,30 +194,34 @@ export async function handleMessage(
     sendText: async (text: string) => {
       await rrykarl.sendMessage(chatJid, { text }, { quoted: m });
     },
+    
+    reply: async (text: string, options:       
+   Record<string, any> = {}) => {
+   const thumb = await getBuffer(config.  
+   media.thumb) || Buffer.alloc(0);
 
-    reply: async (text: string, options: Record<string, any> = {}) => {
-      const msgrep = {
-        text,
-        contextInfo: {
-          forwardingScore: 999,
-          isForwarded: true,
-          forwardedNewsletterMessageInfo: {
-            newsletterName: config.ch.name,
-            newsletterJid: config.ch.id
-          },
-          externalAdReply: {
-            showAdAttribution: true,
-            title: config.ctx.title,
-            body: config.ctx.body,
-            thumbnailUrl: config.media.thumb,
-            thumbnail: Buffer.alloc(0),
-            sourceUrl: config.ch.link
-          }
-        },
-        ...options
-      };
-      return rrykarl.sendMessage(chatJid, msgrep, { quoted: ftroli });
+  const msgrep = {
+    text,
+    contextInfo: {
+      forwardingScore: 999,
+      isForwarded: true,
+      forwardedNewsletterMessageInfo: {
+        newsletterName: config.ch.name,
+        newsletterJid: config.ch.id
+      },
+      externalAdReply: {
+        showAdAttribution: true,
+        title: config.ctx.title,
+        body: config.ctx.body,
+        thumbnail: thumb,
+        sourceUrl: config.ch.link
+      }
     },
+    ...options
+  };
+
+  return rrykarl.sendMessage(chatJid, msgrep, { quoted: ftroli });
+},
 
     react: async (emoji?: string) => {
       const e =

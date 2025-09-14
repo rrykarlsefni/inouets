@@ -208,7 +208,7 @@ async function rrykarlStart() {
           logMessage(m);
 
           const text = m.text?.trim() || "";
-
+          
           if (evalPrefix.some(p => text.startsWith(p))) {
             if (!m.isOwner) continue;
             await runEval(rrykarl, m, text);
