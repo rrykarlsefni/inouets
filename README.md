@@ -1,5 +1,5 @@
 ---
-## inouets (BETA TEST)
+## inouets (base)
 
 ---
 ## License
