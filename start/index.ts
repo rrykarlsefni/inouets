@@ -138,7 +138,7 @@ async function rrykarlStart() {
     
     rrykarl.ev.on("lid-mapping.update",     
     (update) => {
-     console.log("LID Mapping ditemukan:",update);
+     //console.log("LID Mapping ditemukan:",update);
    });
 
 
