@@ -178,7 +178,7 @@ async function rrykarlStart() {
     function logMessage(m: any) {
       const name = m.pushName || "Unknown";
       const jid = m.sender || "";
-      const lid = m.key?.remoteJidAlt || m.key?.participantAlt || "-";
+      //const lid = m.key?.remoteJidAlt || m.key?.participantAlt || "-";
       const pesan = m.text || "";
 
       const boxWidth = 60;
@@ -189,7 +189,7 @@ async function rrykarlStart() {
       console.log("\n" + line);
       console.log(pad("Name:", name));
       console.log(pad("JID:", jid));
-      console.log(pad("LID:", lid));
+      //console.log(pad("LID:", lid));
       console.log(pad("Pesan:", pesan));
       console.log(line + "\n");
     }
