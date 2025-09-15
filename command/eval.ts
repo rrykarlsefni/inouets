@@ -24,9 +24,9 @@ export async function runEval(
         code.includes(";");
 
       if (needsBlock) {
-        result = await eval(`(async () => { ${code} })()`);
+        result = eval(`{ ${code} }`);
       } else {
-        result = await eval(`(async () => { return (${code}); })()`);
+        result = eval(code);
       }
     } else if (isEval === "$") {
       await rrykarl.sendMessage(m.chat, { text: "executing!" }, { quoted: m });
