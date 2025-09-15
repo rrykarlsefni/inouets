@@ -1,3 +1,5 @@
+import { createRequire } from "module";
+const require = createRequire(import.meta.url);
 import makeWASocket, {
   useMultiFileAuthState,
   makeCacheableSignalKeyStore,
@@ -11,8 +13,10 @@ import pino from "pino";
 import chalk from "chalk";
 import readline from "readline";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import NodeCache from "node-cache";
+import pkg from "./package.json";
 import { handleMessage } from "../handle/func.ts";
 import { runEval, evalPrefix } from "../command/eval.ts";
 import { HandleCase } from "../command/case.ts";
@@ -22,7 +26,7 @@ const SESS_DIR = "rrykarl_sessi";
 const NUM_FILE = path.join(SESS_DIR, "number.txt");
 const groupCache = new NodeCache({ stdTTL: 30 * 60, useClones: false });
 
-const delay = (ms: number): Promise<void> => 
+const delay = (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
 function question(query: string): Promise<string> {
@@ -39,6 +43,34 @@ async function getNumber(): Promise<string> {
   if (fs.existsSync(NUM_FILE)) {
     return fs.readFileSync(NUM_FILE, "utf-8").trim();
   }
+
+  function runtime(seconds: number): string {
+    const d = Math.floor(seconds / (3600 * 24));
+    const h = Math.floor((seconds % (3600 * 24)) / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    return `${d}d ${h}h ${m}m ${s}s`;
+  }
+
+  console.clear();
+  console.log(chalk.cyanBright.bold("==== Inouets ===="));
+
+  console.log(chalk.gray("─────────────────────────────\n"));
+  const infoLabel = os.platform() === "android" ? "DEVICE INFORMATION" : "VPS INFORMATION";
+
+  console.log(chalk.blueBright.bold(infoLabel));
+  console.log(chalk.white(` Platform       : ${os.platform()}`));
+  console.log(chalk.white(` Total RAM      : ${(os.totalmem() / 1024 / 1024 / 1024).toFixed(1)} GB`));
+  console.log(chalk.white(` RAM Terpakai   : ${((os.totalmem() - os.freemem()) / 1024 / 1024 / 1024).toFixed(1)} GB`));
+  console.log(chalk.white(` Total CPU      : ${os.cpus().length} Cores`));
+  console.log(chalk.white(` Uptime         : ${runtime(os.uptime())}`));
+  console.log(chalk.gray("────────────────────────────────────"));
+
+  console.log(chalk.cyanBright.bold("PACKAGE INFORMATION"));
+  console.log(chalk.white(` Bot Name       : ${pkg.name || "Unknown"}`));
+  console.log(chalk.white(` Node.js Version: ${process.version}`));
+  console.log(chalk.white(` Packages       : ${Object.keys(pkg.dependencies || {}).length}`));
+  console.log(chalk.gray("────────────────────────────────────\n"));
 
   const raw = await question(
     chalk.white("Masukkan nomor WhatsApp Anda") + "\n" +
@@ -71,11 +103,11 @@ async function rrykarlStart() {
       syncFullHistory: true,
       cachedGroupMetadata: async (jid) => groupCache.get(jid)
     });
-    
-    //cek di : https://baileys.wiki/docs/migration/to-v7.0.0
-    let lidStore: any = null
+
+    //https://baileys.wiki/docs/migration/to-v7.0.0
+    let lidStore: any = null;
     try {
-      lidStore = rrykarl.signalRepository?.getLIDMappingStore?.()
+      lidStore = rrykarl.signalRepository?.getLIDMappingStore?.();
       if (lidStore) {
         //console.log(chalk.green("[LID] getLIDMappingStore tersedia"))
       } else {
@@ -88,81 +120,75 @@ async function rrykarlStart() {
     rrykarl.lidToJid = async (lid: string): Promise<string | null> => {
       if (!lidStore) {
         //console.log(chalk.yellow(`[LID→JID] Skip, lidStore null untuk ${lid}`))
-        return null
+        return null;
       }
       try {
-        const target = lid.endsWith("@lid") ? lid : `${lid}@lid`
+        const target = lid.endsWith("@lid") ? lid : `${lid}@lid`;
         //console.log(chalk.blue(`[LID→JID] Cek: ${target}`))
-        const res = await lidStore.getPNForLID(target)
+        const res = await lidStore.getPNForLID(target);
         if (res) {
           //console.log(chalk.green(`[LID→JID] ${target} → ${res}`))
         } else {
           //console.log(chalk.red(`[LID→JID] Tidak ditemukan untuk: ${target}`))
         }
-        return res
+        return res;
       } catch (err) {
-        //console.error(chalk.red(`[LID→JID] Error untuk ${lid}`), err)
-        return null
+        console.error(chalk.red(`[LID→JID] Error untuk ${lid} | baileys Error:`), err);
+        return null;
       }
-    }
+    };
 
     rrykarl.jidToLid = async (jid: string): Promise<string | null> => {
       if (!lidStore) {
-        //console.log(chalk.yellow(`[JID→LID] Skip, lidStore null untuk ${jid}`))
-        return null
+        return null;
       }
       try {
-        const target = jid.endsWith("@s.whatsapp.net") ? jid : `${jid}@s.whatsapp.net`
-        //console.log(chalk.blue(`[JID→LID] Cek: ${target}`))
-        const res = await lidStore.getLIDForPN(target)
+        const target = jid.endsWith("@s.whatsapp.net") ? jid : `${jid}@s.whatsapp.net`;
+        const res = await lidStore.getLIDForPN(target);
         if (res) {
-          //console.log(chalk.green(`[JID→LID] ${target} → ${res}`))
         } else {
-          //console.log(chalk.red(`[JID→LID] Tidak ditemukan untuk: ${target}`))
         }
-        return res
+        return res;
       } catch (err) {
-        //console.error(chalk.red(`[JID→LID] Error untuk ${jid}`), err)
-        return null
+        return null;
       }
-    }
+    };
 
     rrykarl.decodeJid = async (jid?: string): Promise<string> => {
-  if (!jid) return ""
-  try {
-    if (/^\d+@s\.whatsapp\.net$/.test(jid) || jid.endsWith("@g.us")) {
-      return jid
-    }
-    if (jid.endsWith("@lid")) {
-      const pure = jid.replace(/@lid$/, "")
+      if (!jid) return "";
       try {
-        const res = await rrykarl.lidToJid(pure)
-        if (res) return await rrykarl.decodeJid(res)
+        if (/^\d+@s\.whatsapp\.net$/.test(jid) || jid.endsWith("@g.us")) {
+          return jid;
+        }
+        if (jid.endsWith("@lid")) {
+          const pure = jid.replace(/@lid$/, "");
+          try {
+            const res = await rrykarl.lidToJid(pure);
+            if (res) return await rrykarl.decodeJid(res);
+          } catch {
+            return jid;
+          }
+        }
+        if (jid.includes(":")) {
+          const base = jid.split(":")[0];
+          if (/^\d+$/.test(base)) {
+            const norm = base + "@s.whatsapp.net";
+            return await rrykarl.decodeJid(norm);
+          }
+        }
+        if (/^\d+@\d+$/.test(jid)) {
+          const norm = jid.split("@")[0] + "@s.whatsapp.net";
+          return norm;
+        }
+        return jid;
       } catch {
-        return jid
+        return jid || "";
       }
-    }
-    if (jid.includes(":")) {
-      const base = jid.split(":")[0]
-      if (/^\d+$/.test(base)) {
-        const norm = base + "@s.whatsapp.net"
-        return await rrykarl.decodeJid(norm)
-      }
-    }
-    if (/^\d+@\d+$/.test(jid)) {
-      const norm = jid.split("@")[0] + "@s.whatsapp.net"
-      return norm
-    }
-    return jid
-  } catch {
-    return jid || ""
-  }
-}
-    
+    };
+
     rrykarl.ev.on("creds.update", saveCreds);
-    
-    rrykarl.ev.on("lid-mapping.update", (update) => {
-})
+
+    rrykarl.ev.on("lid-mapping.update", (update) => {});
 
     if (!state.creds.registered) {
       (async () => {
@@ -179,7 +205,7 @@ async function rrykarlStart() {
         }
       })();
     }
-    
+
     rrykarl.ev.on("connection.update", async (update) => {
       const { connection, lastDisconnect } = update;
       if (connection === "connecting") {
@@ -197,8 +223,8 @@ async function rrykarlStart() {
         if (statusCode !== DisconnectReason.loggedOut) {
           setTimeout(rrykarlStart, 5000);
         } else {
-          try { 
-            fs.rmSync(SESS_DIR, { recursive: true, force: true }); 
+          try {
+            fs.rmSync(SESS_DIR, { recursive: true, force: true });
           } catch {}
           setTimeout(rrykarlStart, 2000);
         }
@@ -208,8 +234,14 @@ async function rrykarlStart() {
     function logMessage(m: any) {
       const name = m.pushName || "Unknown";
       const jid = m.sender || "";
-      //const lid = m.key?.remoteJidAlt || m.key?.participantAlt || "-";
       const pesan = m.text || "";
+
+      const now = new Date();
+      const time = now.toLocaleTimeString("id-ID", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
 
       const boxWidth = 60;
       const line = chalk.gray("─".repeat(boxWidth));
@@ -219,7 +251,7 @@ async function rrykarlStart() {
       console.log("\n" + line);
       console.log(pad("Name:", name));
       console.log(pad("JID:", jid));
-      //console.log(pad("LID:", lid));
+      console.log(pad("Waktu:", time));
       console.log(pad("Pesan:", pesan));
       console.log(line + "\n");
     }
@@ -238,7 +270,7 @@ async function rrykarlStart() {
           logMessage(m);
 
           const text = m.text?.trim() || "";
-          
+
           if (evalPrefix.some(p => text.startsWith(p))) {
             if (!m.isOwner) continue;
             await runEval(rrykarl, m, text);
@@ -263,7 +295,7 @@ async function rrykarlStart() {
     rrykarl.ev.on("chats.update", (updates) => {
       //console.log("Chats updated:", updates);
     });
-    
+
     rrykarl.ev.on("groups.update", async (updates) => {
       for (const update of updates) {
         if (update.id) {
@@ -318,7 +350,6 @@ async function rrykarlStart() {
         });
       });
     }, 20 * 60 * 1000);
-
   } catch (err) {
     setTimeout(rrykarlStart, 5000);
   }

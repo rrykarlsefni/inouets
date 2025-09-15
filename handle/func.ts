@@ -7,7 +7,7 @@ import type { ExtendedMessage } from "./types.ts";
 import { config } from "../config/config.ts";
 import { getBuffer, getProfile } from "./buffer.ts";
 
-function normalizeMediaType(mtype?: string) {
+function MediaType(mtype?: string) {
   if (!mtype) return;
   const map: Record<string, string> = {
     image: "image",
@@ -59,16 +59,17 @@ export async function handleMessage(
   const msg = (m.message as any)[mtype];
   const isGroup = m.key.remoteJid?.endsWith("@g.us") || false;
 
-  const decodedOwners = config.noOwner.map(
+  const JidOwn = config.noOwner.map(
   num => num.replace(/\D/g, "") + "@s.whatsapp.net"
 );
-
-  const decodedLidOwners = config.lidOwner.map(
+  const LidOwn = config.lidOwner.map(
   lid => lid.replace(/\D/g, "") + "@lid"
 );
 
   const chatJid   = await rrykarl.decodeJid(m.key.remoteJid!);
-  const rawSender = isGroup ? m.key.participant : m.key.remoteJid;
+  const rawSender = isGroup 
+  ? (m.key.participantAlt || m.key.participant) 
+  : m.key.remoteJid;
   const senderJid  = rawSender ? await rrykarl.decodeJid(rawSender) : "";
 
   const botJid = rrykarl.user?.id
@@ -76,12 +77,14 @@ export async function handleMessage(
   : "";
 
   const isOwner =
-  decodedOwners.includes(senderJid) ||
-  decodedLidOwners.includes(senderJid) ||
+  JidOwn.includes(senderJid) ||
+  LidOwn.includes(senderJid) ||
   senderJid === botJid ||
   m.key.fromMe;
+  
   const text = extractText(m.message) || extractText(msg);
 
+  //group
   let groupMetadata: any = {};
   let groupAdmins: string[] = [];
   let groupOwner = "";
@@ -103,6 +106,7 @@ export async function handleMessage(
     groupSubject = groupMetadata?.subject || "";
   }
 
+  //fkreply
   const fakethumb: Buffer = await getProfile(rrykarl, senderJid);
 
   const ftroli: proto.IWebMessageInfo = {
@@ -157,7 +161,7 @@ export async function handleMessage(
     groupSubject,
     mentionedJid,
     isBaileys,
-    mediaType: normalizeMediaType(mtype),
+    mediaType: MediaType(mtype),
 
     quoted: msg?.contextInfo?.quotedMessage
       ? {
@@ -174,7 +178,7 @@ export async function handleMessage(
             : "",
           text: extractText(msg?.contextInfo?.quotedMessage),
           mtype: getContentType(msg?.contextInfo?.quotedMessage) || undefined,
-          mediaType: normalizeMediaType(
+          mediaType: MediaType(
             getContentType(msg?.contextInfo?.quotedMessage)
           ),
           mentionedJid: msg?.contextInfo?.mentionedJid || [],
@@ -243,7 +247,7 @@ export async function handleMessage(
       if (!type) throw new Error("Quoted tidak punya tipe.");
 
       const media = (quotedMsg as any)[type];
-      const normType = normalizeMediaType(type);
+      const normType = MediaType(type);
       if (!normType) throw new Error("Tipe media tidak didukung: " + type);
 
       const stream = await downloadContentFromMessage(media, normType as any);
@@ -256,7 +260,7 @@ export async function handleMessage(
 
   if (extended.mtype && extended.msg) {
     extended.download = async () => {
-      const normType = normalizeMediaType(extended.mtype!);
+      const normType = MediaType(extended.mtype!);
       if (!normType) {
         throw new Error("Tipe media tidak didukung: " + extended.mtype);
       }

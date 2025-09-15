@@ -62,7 +62,8 @@ Please use only the official repository to get proper updates and support.
 - Includes **eval** & **exec** utilities  
 - Pairing code login support  
 - Auto-restart with **nodemon** & **PM2**  
-- Fixed LID ( sept 2025)
+- Fixed LID (m.key.participantAlt)
+- Fixed convert LID ( sept 2025)
 
 ---
 
@@ -71,7 +72,7 @@ Please use only the official repository to get proper updates and support.
 ---
 ## Example case
 ```js
-m.reply("text") untuk mengirim pesan simple
+m.reply("text") //untuk mengirim pesan simple
 m.react() //react random dari config, gunakan m.react("😥") untuk react custom
 m.chat //jid pesan di mana bot di command(m.key.remoteJid)
 m.sender //jid user yang meng command (m.key.participant)
@@ -98,6 +99,13 @@ m.reply("hi");
 ---
 ## Installation-
 ### Install via termux
+
+#### Install package
+```bash
+$ pkg update && pkg upgrade
+$ pkg install git
+$ okg install nodejs
+```
 #### Opsi 1: Manual
 ```bash
 $ pkg update && pkg upgrade
