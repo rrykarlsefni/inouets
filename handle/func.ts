@@ -69,16 +69,16 @@ export async function handleMessage(
 
   const chatJid   = await rrykarl.decodeJid(m.key.remoteJid!);
   const rawSender = isGroup ? m.key.participant : m.key.remoteJid;
-  const senderId  = rawSender ? await rrykarl.decodeJid(rawSender) : "";
+  const senderJid  = rawSender ? await rrykarl.decodeJid(rawSender) : "";
 
   const botJid = rrykarl.user?.id
   ? await rrykarl.decodeJid(rrykarl.user.id)
   : "";
 
   const isOwner =
-  decodedOwners.includes(senderId) ||
-  decodedLidOwners.includes(senderId) ||
-  senderId === botJid ||
+  decodedOwners.includes(senderJid) ||
+  decodedLidOwners.includes(senderJid) ||
+  senderJid === botJid ||
   m.key.fromMe;
   const text = extractText(m.message) || extractText(msg);
 
