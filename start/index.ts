@@ -66,78 +66,103 @@ async function rrykarlStart() {
         keys: makeCacheableSignalKeyStore(state.keys, pino({ level: "silent" }), cache)
       },
       printQRInTerminal: false,
-      msgRetryCounterMap: {},
-      retryRequestDelayMs: 250,
       markOnlineOnConnect: false,
       emitOwnEvents: true,
       syncFullHistory: true,
       cachedGroupMetadata: async (jid) => groupCache.get(jid)
     });
-
-    const lidStore = rrykarl.signalRepository.getLIDMappingStore();
+    
+    //cek di : https://baileys.wiki/docs/migration/to-v7.0.0
+    let lidStore: any = null
+    try {
+      lidStore = rrykarl.signalRepository?.getLIDMappingStore?.()
+      if (lidStore) {
+        //console.log(chalk.green("[LID] getLIDMappingStore tersedia"))
+      } else {
+        //console.log(chalk.yellow("[LID] getLIDMappingStore tidak tersedia"))
+      }
+    } catch (err) {
+      //console.warn(chalk.red("[LID] Error ambil getLIDMappingStore"), err)
+    }
 
     rrykarl.lidToJid = async (lid: string): Promise<string | null> => {
-      try {
-        const target = lid.endsWith("@lid") ? lid : `${lid}@lid`;
-        //console.log(chalk.yellow(`[LID→JID] Proses untuk: ${target}`));
-
-        const res = await lidStore.getPNForLID(target);
-        if (res) {
-         //console.log(chalk.green(`[LID→JID] Sukses: ${target} → ${res}`));
-        } else {
-          console.log(chalk.red(`[LID→JID] Tidak ditemukan untuk: ${target}`));
-        }
-        return res;
-      } catch (err) {
-        console.error(chalk.red(`[LID→JID] Error proses untuk: ${lid}`), err);
-        return null;
+      if (!lidStore) {
+        //console.log(chalk.yellow(`[LID→JID] Skip, lidStore null untuk ${lid}`))
+        return null
       }
-    };
+      try {
+        const target = lid.endsWith("@lid") ? lid : `${lid}@lid`
+        //console.log(chalk.blue(`[LID→JID] Cek: ${target}`))
+        const res = await lidStore.getPNForLID(target)
+        if (res) {
+          //console.log(chalk.green(`[LID→JID] ${target} → ${res}`))
+        } else {
+          //console.log(chalk.red(`[LID→JID] Tidak ditemukan untuk: ${target}`))
+        }
+        return res
+      } catch (err) {
+        //console.error(chalk.red(`[LID→JID] Error untuk ${lid}`), err)
+        return null
+      }
+    }
 
     rrykarl.jidToLid = async (jid: string): Promise<string | null> => {
-      try {
-        const target = jid.endsWith("@s.whatsapp.net") ? jid : `${jid}@s.whatsapp.net`;
-        return await lidStore.getLIDForPN(target);
-      } catch {
-        return null;
+      if (!lidStore) {
+        //console.log(chalk.yellow(`[JID→LID] Skip, lidStore null untuk ${jid}`))
+        return null
       }
-    };
+      try {
+        const target = jid.endsWith("@s.whatsapp.net") ? jid : `${jid}@s.whatsapp.net`
+        //console.log(chalk.blue(`[JID→LID] Cek: ${target}`))
+        const res = await lidStore.getLIDForPN(target)
+        if (res) {
+          //console.log(chalk.green(`[JID→LID] ${target} → ${res}`))
+        } else {
+          //console.log(chalk.red(`[JID→LID] Tidak ditemukan untuk: ${target}`))
+        }
+        return res
+      } catch (err) {
+        //console.error(chalk.red(`[JID→LID] Error untuk ${jid}`), err)
+        return null
+      }
+    }
 
     rrykarl.decodeJid = async (jid?: string): Promise<string> => {
-      if (!jid) return "";
-
+  if (!jid) return ""
+  try {
+    if (/^\d+@s\.whatsapp\.net$/.test(jid) || jid.endsWith("@g.us")) {
+      return jid
+    }
+    if (jid.endsWith("@lid")) {
+      const pure = jid.replace(/@lid$/, "")
       try {
-        if (/^\d+@s\.whatsapp\.net$/.test(jid) || jid.endsWith("@g.us")) {
-          return jid;
-        }
-
-        if (jid.endsWith("@lid")) {
-          const pureLid = jid.replace(/@lid$/, "");
-          const res = await rrykarl.lidToJid(pureLid).catch(() => null);
-          if (res) return await rrykarl.decodeJid(res);
-        }
-
-        if (jid.includes(":")) {
-          const base = jid.split(":")[0];
-          if (/^\d+$/.test(base)) {
-            return await rrykarl.decodeJid(base + "@s.whatsapp.net");
-          }
-        }
-        if (/^\d+@\d+$/.test(jid)) {
-          return jid.split("@")[0] + "@s.whatsapp.net";
-        }
-
-        return jid;
+        const res = await rrykarl.lidToJid(pure)
+        if (res) return await rrykarl.decodeJid(res)
       } catch {
-        return jid || "";
+        return jid
       }
-    };
-
+    }
+    if (jid.includes(":")) {
+      const base = jid.split(":")[0]
+      if (/^\d+$/.test(base)) {
+        const norm = base + "@s.whatsapp.net"
+        return await rrykarl.decodeJid(norm)
+      }
+    }
+    if (/^\d+@\d+$/.test(jid)) {
+      const norm = jid.split("@")[0] + "@s.whatsapp.net"
+      return norm
+    }
+    return jid
+  } catch {
+    return jid || ""
+  }
+}
+    
     rrykarl.ev.on("creds.update", saveCreds);
     
     rrykarl.ev.on("lid-mapping.update", (update) => {
-     //console.log("LID Mapping ditemukan:",update);
-    });
+})
 
     if (!state.creds.registered) {
       (async () => {

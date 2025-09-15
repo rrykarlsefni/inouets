@@ -1,6 +1,7 @@
 export const config = {
   nameOwner: "rrykarlsefni",
   noOwner: ["6288802752781"],
+  lidOwner: ["174182751010842],
 
   prefix: [".", ",", "!", "?"],
   emoji: ["😹", "🤭", "🥴"],

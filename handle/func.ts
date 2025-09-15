@@ -60,21 +60,26 @@ export async function handleMessage(
   const isGroup = m.key.remoteJid?.endsWith("@g.us") || false;
 
   const decodedOwners = config.noOwner.map(
-    num => num.replace(/\D/g, "") + "@s.whatsapp.net"
-  );
+  num => num.replace(/\D/g, "") + "@s.whatsapp.net"
+);
+
+  const decodedLidOwners = config.lidOwner.map(
+  lid => lid.replace(/\D/g, "") + "@lid"
+);
 
   const chatJid   = await rrykarl.decodeJid(m.key.remoteJid!);
   const rawSender = isGroup ? m.key.participant : m.key.remoteJid;
-  const senderJid = rawSender ? await rrykarl.decodeJid(rawSender) : "";
-  const botJid    = rrykarl.user?.id
-    ? await rrykarl.decodeJid(rrykarl.user.id)
-    : "";
+  const senderId  = rawSender ? await rrykarl.decodeJid(rawSender) : "";
+
+  const botJid = rrykarl.user?.id
+  ? await rrykarl.decodeJid(rrykarl.user.id)
+  : "";
 
   const isOwner =
-    decodedOwners.includes(senderJid) ||
-    senderJid === botJid ||
-    m.key.fromMe;
-
+  decodedOwners.includes(senderId) ||
+  decodedLidOwners.includes(senderId) ||
+  senderId === botJid ||
+  m.key.fromMe;
   const text = extractText(m.message) || extractText(msg);
 
   let groupMetadata: any = {};
@@ -195,34 +200,33 @@ export async function handleMessage(
       await rrykarl.sendMessage(chatJid, { text }, { quoted: m });
     },
     
-    reply: async (text: string, options:       
-   Record<string, any> = {}) => {
-   const thumb = await getBuffer(config.  
-   media.thumb) || Buffer.alloc(0);
-
-  const msgrep = {
-    text,
-    contextInfo: {
-      forwardingScore: 999,
-      isForwarded: true,
-      forwardedNewsletterMessageInfo: {
-        newsletterName: config.ch.name,
-        newsletterJid: config.ch.id
+    reply: async (text: string, options: Record<string, any> = {}) => {
+  try {
+    const msgrep = {
+      text,
+      contextInfo: {
+        forwardingScore: 999,
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: config.ch?.id ? {
+          newsletterName: config.ch.name,
+          newsletterJid: config.ch.id
+        } : undefined,
+        externalAdReply: {
+          title: config.ctx.title,
+          body: config.ctx.body,
+          thumbnailUrl: config.media.thumb,
+          thumbnail: Buffer.alloc(0),
+          sourceUrl: config.ch.link
+        }
       },
-      externalAdReply: {
-        showAdAttribution: true,
-        title: config.ctx.title,
-        body: config.ctx.body,
-        thumbnail: thumb,
-        sourceUrl: config.ch.link
-      }
-    },
-    ...options
-  };
-
-  return rrykarl.sendMessage(chatJid, msgrep, { quoted: ftroli });
+      ...options
+    };
+    return await rrykarl.sendMessage(chatJid, msgrep, { quoted: ftroli });
+  } catch (err) {
+    console.error("reply error:", err);
+  }
 },
-
+    
     react: async (emoji?: string) => {
       const e =
         emoji || config.emoji[Math.floor(Math.random() * config.emoji.length)];
