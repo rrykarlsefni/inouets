@@ -24,7 +24,6 @@ export async function getBuffer(source: string | Buffer): Promise<Buffer | null>
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
             "AppleWebKit/537.36 (KHTML, like Gecko) " +
             "Chrome/113.0.0.0 Safari/537.36",
-          Accept: "*/*"
         },
         timeout: 15000,
         maxRedirects: 5
