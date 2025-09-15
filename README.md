@@ -154,6 +154,10 @@ $ npm run dev
 $ npm install
 $ npm run pm2
 ```
+### Debug
+```bash
+$ DEBUG=* npx ts-node --esm start/index.ts
+```
 
 ---
 ## Thanks
