@@ -132,7 +132,7 @@ $ pkg update && pkg upgrade
 $ pkg install git -y
 $ pkg install nodejs -y
 $ git clone https://github.com/rrykarlsefni/inouets
-$ cd inouets
+$ cd ~/inouets
 $ npm install
 $ npm start
 ```
