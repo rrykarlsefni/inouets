@@ -138,7 +138,7 @@ $ npm start
 $ npm install
 $ npm start
 ```
-### with tsx
+### with ts-node
 ```bash
 $ npm install
 $ npm run ts-node
