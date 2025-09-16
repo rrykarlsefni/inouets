@@ -141,7 +141,7 @@ $ npm start
 ### with tsx
 ```bash
 $ npm install
-$ npm run tsx
+$ npm run ts-node
 ```
 ### Mode Developer
 ```bash
