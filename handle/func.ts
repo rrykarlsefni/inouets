@@ -1,9 +1,9 @@
 import {
   downloadContentFromMessage,
   getContentType,
-  proto,
-  WASocket,
+  proto
 } from "@whiskeysockets/baileys";
+import type { WASocket } from "@whiskeysockets/baileys";
 import type { ExtendedMessage } from "./types.ts";
 import { config } from "../config/config.ts";
 import { getBuffer, getProfile } from "./buffer.ts";
