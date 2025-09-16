@@ -16,11 +16,13 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import NodeCache from "node-cache";
-import pkg from "../package.json";
 import { handleMessage } from "../handle/func.ts";
-import { runEval, evalPrefix } from "../command/eval.ts";
 import { HandleCase } from "../command/case.ts";
-import { config } from "../config/config.ts";
+import { runEval, evalPrefix } from "../command/eval.ts";
+import { config } from "../config/config.ts"
+
+const pkg = require("../package.json");
+;
 
 const SESS_DIR = "rrykarl_sessi";
 const NUM_FILE = path.join(SESS_DIR, "number.txt");
