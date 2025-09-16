@@ -12,7 +12,7 @@
     ".cache/**",
     "dist/**"
   ],
-  "exec": "ts-node --esm start/index.ts",
+  "exec": "tsx start/index.ts"
   "delay": "500",
   "verbose": true,
   "signal": "SIGUSR2",

@@ -10,7 +10,7 @@ export interface QuotedMessage {
   text?: string;
   mtype?: string;
   mediaType?: string;
-  msg?: any;
+  msg?: proto.IMessage | any;
   mentionedJid?: string[];
   download?: () => Promise<Buffer>;
   react?: (emoji?: string) => Promise<void>;
@@ -30,13 +30,13 @@ export type ExtendedMessage = {
   key: proto.IMessageKey;
   mtype?: string;
   mediaType?: string;
-  msg?: any;
+  msg?: proto.IMessage | any;
   text?: string;
   groupSubject?: string;
   mentionedJid?: string[];
   quoted?: QuotedMessage | null;
   sendText: (text: string) => Promise<void>;
-  reply: (text: string, options?: Record<string, any>) => Promise<void>;
+  reply: (text: string, options?: Record<string, any>) => Promise<proto.WebMessageInfo | void>;
   react: (emoji?: string) => Promise<void>;
   download?: () => Promise<Buffer>;
 };

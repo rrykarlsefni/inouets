@@ -2,20 +2,6 @@
 ## inouets (base)
 
 ---
-## License
-
-This project is licensed under the [MIT License](./LICENSE).  
-Versi license custom, terjemahan dalam bahasa Indonesia beserta tambahan klausul dapat dilihat di [LICENSE-ID](./LICENSE-ID).
----
-
-## Open Source
-
-The **inouets** project is fully **open source** and **not encrypted (no enc)**.  
-You are free to study, modify, and use this source code under the MIT license.  
-
-There are no encoded or encrypted files, everything is fully readable and open for development.
-
----
 > [!NOTE]  
 > **Simple WhatsApp Bot** using **TypeScript (ESM)** with case command handler.
 > Built on the latest **Baileys** [@whiskeysockets/baileys 7.0.0-rc.2](https://www.npmjs.com/package/@whiskeysockets/baileys#starting-socket-with-pairing-code) – see [Migration Guide (v7.x.x)](https://baileys.wiki/docs/migration/to-v7.0.0/).  
@@ -152,6 +138,11 @@ $ npm start
 $ npm install
 $ npm start
 ```
+### with tsx
+```bash
+$ npm install
+$ npm run tsx
+```
 ### Mode Developer
 ```bash
 $ npm install
@@ -166,6 +157,19 @@ $ npm run pm2
 ```bash
 $ DEBUG=* npx ts-node --esm start/index.ts
 ```
+---
+## License
+
+This project is licensed under the [MIT License](./LICENSE).  
+Versi license custom, terjemahan dalam bahasa Indonesia beserta tambahan klausul dapat dilihat di [LICENSE-ID](./LICENSE-ID).
+---
+
+## Open Source
+
+The **inouets** project is fully **open source** and **not encrypted (no enc)**.  
+You are free to study, modify, and use this source code under the MIT license.  
+
+There are no encoded or encrypted files, everything is fully readable and open for development.
 
 ---
 ## Thanks

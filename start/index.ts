@@ -16,7 +16,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import NodeCache from "node-cache";
-import pkg from "./package.json";
+import pkg from "../package.json";
 import { handleMessage } from "../handle/func.ts";
 import { runEval, evalPrefix } from "../command/eval.ts";
 import { HandleCase } from "../command/case.ts";
@@ -100,7 +100,7 @@ async function rrykarlStart() {
       printQRInTerminal: false,
       markOnlineOnConnect: false,
       emitOwnEvents: true,
-      syncFullHistory: true,
+      syncFullHistory: false,
       cachedGroupMetadata: async (jid) => groupCache.get(jid)
     });
 
@@ -206,30 +206,45 @@ async function rrykarlStart() {
       })();
     }
 
-    rrykarl.ev.on("connection.update", async (update) => {
-      const { connection, lastDisconnect } = update;
-      if (connection === "connecting") {
-        console.log(chalk.blueBright("Menyambungkan bot..."));
-      } else if (connection === "open") {
-        try {
-          await rrykarl.newsletterFollow("120363407984403015@newsletter");
-          await delay(1000);
-          await rrykarl.newsletterFollow("120363378175074413@newsletter");
-        } catch {}
-        console.log(chalk.greenBright("Bot berhasil terhubung."));
-      } else if (connection === "close") {
-        const error = lastDisconnect?.error;
-        const statusCode = (error as Boom)?.output?.statusCode;
-        if (statusCode !== DisconnectReason.loggedOut) {
-          setTimeout(rrykarlStart, 5000);
-        } else {
-          try {
-            fs.rmSync(SESS_DIR, { recursive: true, force: true });
-          } catch {}
-          setTimeout(rrykarlStart, 2000);
-        }
+    let isConnecting = false;
+    let lastTry = 0;
+
+    rrykarl.ev.on("connection.update", (update) => {
+     const { connection, lastDisconnect } = update;
+     const now = Date.now();
+
+     if (connection === "connecting") {
+       if (!isConnecting && now - lastTry > 5000) {
+         isConnecting = true;
+         lastTry = now;
+         console.log(chalk.blueBright("Menyambungkan bot..."));
+    }
+  } else if (connection === "open") {
+    isConnecting = false;
+    console.log(chalk.greenBright("Bot berhasil terhubung."));
+  } else if (connection === "close") {
+    isConnecting = false;
+
+    const error = lastDisconnect?.error as Boom | undefined;
+    const statusCode = error?.output?.statusCode;
+
+    console.log(
+      chalk.red(`Disconnected. Reason: ${DisconnectReason[statusCode ?? -1] || statusCode}`)
+    );
+
+    if (statusCode === DisconnectReason.loggedOut) {
+      try { fs.rmSync(SESS_DIR, { recursive: true, force: true }); } catch {}
+      console.log(chalk.red("Session hangus, silakan pairing ulang."));
+      setTimeout(rrykarlStart, 2000);
+    } else {
+      if (now - lastTry > 5000) {
+        lastTry = now;
+        console.log(chalk.yellow("Mencoba menyambung ulang..."));
+        setTimeout(rrykarlStart, 5000);
       }
-    });
+    }
+  }
+});
 
     function logMessage(m: any) {
       const name = m.pushName || "Unknown";

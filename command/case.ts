@@ -3,12 +3,35 @@
  ~> testi https://whatsapp.com/channel/0029Vb6bvDpDzgTBYTRlev2g
  ~> chat wa.me/6288802752781
  */ 
- 
+
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 import type { ExtendedMessage } from "../handle/types.ts";
 import { config } from "../config/config.ts";
 import { mess } from "../config/message.ts";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const filePath = path.resolve(__dirname, "../config/settings.json");
+/**/
+function getSettings() {
+  try {
+    return JSON.parse(fs.readFileSync(filePath, "utf-8"));
+  } catch {
+    return { public: true };
+  }
+}
+
+function setSettings(newSettings: Record<string, any>) {
+  fs.writeFileSync(filePath, JSON.stringify(newSettings, null, 2));
+}
+/**/
 export async function HandleCase(rrykarl: any, m: ExtendedMessage, command: string) {
+  const settings = getSettings();
+  
+  if (!settings.public && !m.isOwner) return null;
+
   switch (command) {
     case "menu": {
       await m.react();
@@ -24,8 +47,8 @@ ini menu
     } break;
 
     case "ping": {
-      const start = Date.now();
       await m.react();
+      const start = Date.now();
       const sent = await m.reply("Testing...");
       const latency = Date.now() - start;
       await rrykarl.sendMessage(
@@ -34,6 +57,35 @@ ini menu
         { quoted: sent }
       );
     } break;
+    
+    case "public": {
+      if (!m.isOwner) return m.reply(mess.own);
+      setSettings({ ...settings, public: true });
+      await m.reply("Mode *Public* aktif");
+    } break;
+
+    case "self": {
+      if (!m.isOwner) return m.reply(mess.own);
+      setSettings({ ...settings, public: false });
+      await m.reply("Mode *Self* aktif");
+    } break;
+    
+    case "settingcek":
+    case "ceksettings":
+    case "ceksetting": {
+     await m.react();
+     let teks = `── 「 *CEK SETTINGS* 」 ──\n\n`;
+     Object.entries(settings).forEach(([key, val]) => {
+       if (typeof val === "boolean") {
+         teks += `› *${key}* : ${val ? "on" : "off"}\n`;
+       } else if (Array.isArray(val)) {
+         teks += `› *${key}* : [ ${val.join(", ")} ]\n`;
+       } else {
+         teks += `› *${key}* : ${val}\n`;
+       }
+     });
+     await m.reply(teks.trim());
+   } break;
 
     case "owner": {
       const data = config.kontak;

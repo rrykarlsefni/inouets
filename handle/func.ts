@@ -1,7 +1,8 @@
 import {
   downloadContentFromMessage,
   getContentType,
-  proto
+  proto,
+  WASocket,
 } from "@whiskeysockets/baileys";
 import type { ExtendedMessage } from "./types.ts";
 import { config } from "../config/config.ts";
@@ -48,7 +49,7 @@ function extractText(msg: any): string {
 }
 
 export async function handleMessage(
-  rrykarl: any,
+  rrykarl: WASocket,
   m: proto.IWebMessageInfo
 ): Promise<ExtendedMessage | null> {
   if (!m.message) return null;
@@ -59,12 +60,13 @@ export async function handleMessage(
   const msg = (m.message as any)[mtype];
   const isGroup = m.key.remoteJid?.endsWith("@g.us") || false;
 
-  const JidOwn = config.noOwner.map(
-  num => num.replace(/\D/g, "") + "@s.whatsapp.net"
+  const JidOwn: string[] = (config.noOwner ?? []).map(
+  (num: string) => num.replace(/\D/g, "") + "@s.whatsapp.net"
 );
-  const LidOwn = config.lidOwner.map(
-  lid => lid.replace(/\D/g, "") + "@lid"
-);
+
+const LidOwn: string[] = (config.lidOwner ?? [])
+  .filter((lid: string) => lid && lid.trim() !== "")
+  .map((lid: string) => lid.replace(/\D/g, "") + "@lid");
 
   const chatJid   = await rrykarl.decodeJid(m.key.remoteJid!);
   const rawSender = isGroup 
