@@ -1,7 +1,9 @@
 import axios from "axios";
 import fs from "fs";
 import path from "path";
-import * as Jimp from "jimp";
+import * as JimpNamespace from "jimp";
+
+const Jimp = (JimpNamespace as any).default || JimpNamespace;
 
 export async function resizeImage(
   imageBuffer: Buffer,
@@ -15,7 +17,6 @@ export async function resizeImage(
 export async function getBuffer(source: string | Buffer): Promise<Buffer | null> {
   try {
     if (Buffer.isBuffer(source)) return source;
-
     if (/^https?:\/\//i.test(source)) {
       const res = await axios.get<ArrayBuffer>(source, {
         responseType: "arraybuffer",
@@ -26,15 +27,13 @@ export async function getBuffer(source: string | Buffer): Promise<Buffer | null>
             "Chrome/113.0.0.0 Safari/537.36",
         },
         timeout: 15000,
-        maxRedirects: 5
+        maxRedirects: 5,
       });
       return Buffer.from(res.data);
     }
-
     if (fs.existsSync(source)) {
       return fs.promises.readFile(path.resolve(source));
     }
-
     return Buffer.from(source);
   } catch (err: any) {
     console.error("Gagal ambil buffer:", err.message);

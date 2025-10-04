@@ -90,13 +90,15 @@ m.reply("hi");
 ```bash
 $ pkg update && pkg upgrade
 $ pkg install git
-$ okg install nodejs
+$ pkg install nodejs
+$ pkg install ffmpeg
 ```
 #### Opsi 1: Manual
 ```bash
 $ pkg update && pkg upgrade
 $ pkg install git -y
 $ pkg install nodejs -y
+$ pkg install ffmpeg -y
 $ cp -r /sdcard/inouets ~/inouets
 $ cd ~/inouets
 $ npm install
@@ -106,7 +108,7 @@ $ npm start
 #### Opsi 2: One-liner
 ```bash
 $ pkg update && pkg upgrade
-$ pkg install git && pkg install nodejs -y
+$ pkg install git && pkg install ffmpeg && pkg install nodejs -y
 $ cp -r /sdcard/inouets ~/inouets && cd ~/inouets
 $ npm install && npm start
 ```
@@ -125,6 +127,7 @@ $ npm install && npm start
 $ pkg update && pkg upgrade
 $ pkg install git -y
 $ pkg install nodejs -y
+$ pkg install ffmpeg -y
 $ git clone https://github.com/rrykarlsefni/inouets
 $ cd ~/inouets
 $ npm install

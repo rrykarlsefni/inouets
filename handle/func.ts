@@ -1,7 +1,8 @@
 import {
   downloadContentFromMessage,
   getContentType,
-  proto
+  proto,
+  jidNormalizedUser
 } from "@whiskeysockets/baileys";
 import type { WASocket } from "@whiskeysockets/baileys";
 import type { ExtendedMessage } from "./types.ts";
@@ -48,6 +49,16 @@ function extractText(msg: any): string {
   }
 }
 
+function detectBaileysId(id?: string): boolean {
+  return (
+    typeof id === "string" &&
+    /^[0-9A-F]+$/i.test(id) &&
+    (id.startsWith("BAE5") ||
+      id.startsWith("3EB0") ||
+      id.length <= 24)
+  );
+}
+
 export async function handleMessage(
   rrykarl: WASocket,
   m: proto.IWebMessageInfo
@@ -61,32 +72,33 @@ export async function handleMessage(
   const isGroup = m.key.remoteJid?.endsWith("@g.us") || false;
 
   const JidOwn: string[] = (config.noOwner ?? []).map(
-  (num: string) => num.replace(/\D/g, "") + "@s.whatsapp.net"
-);
+    (num: string) => jidNormalizedUser(num.replace(/\D/g, "") + "@s.whatsapp.net")
+  );
 
-const LidOwn: string[] = (config.lidOwner ?? [])
-  .filter((lid: string) => lid && lid.trim() !== "")
-  .map((lid: string) => lid.replace(/\D/g, "") + "@lid");
+  const LidOwn: string[] = (config.lidOwner ?? [])
+    .filter((lid: string) => lid && lid.trim() !== "")
+    .map((lid: string) => jidNormalizedUser(lid.replace(/\D/g, "") + "@lid"));
 
-  const chatJid   = await rrykarl.decodeJid(m.key.remoteJid!);
-  const rawSender = isGroup 
-  ? (m.key.participantAlt || m.key.participant) 
-  : m.key.remoteJid;
-  const senderJid  = rawSender ? await rrykarl.decodeJid(rawSender) : "";
+  const chatJid = jidNormalizedUser(await rrykarl.decodeJid(m.key.remoteJid!));
+  const rawSender = isGroup
+    ? (m.key.participantAlt || m.key.participant)
+    : m.key.remoteJid;
+  const senderJid = rawSender
+    ? jidNormalizedUser(await rrykarl.decodeJid(rawSender))
+    : "";
 
   const botJid = rrykarl.user?.id
-  ? await rrykarl.decodeJid(rrykarl.user.id)
-  : "";
+    ? jidNormalizedUser(await rrykarl.decodeJid(rrykarl.user.id))
+    : "";
 
   const isOwner =
-  JidOwn.includes(senderJid) ||
-  LidOwn.includes(senderJid) ||
-  senderJid === botJid ||
-  m.key.fromMe;
-  
+    JidOwn.includes(senderJid) ||
+    LidOwn.includes(senderJid) ||
+    senderJid === botJid ||
+    m.key.fromMe;
+
   const text = extractText(m.message) || extractText(msg);
 
-  //group
   let groupMetadata: any = {};
   let groupAdmins: string[] = [];
   let groupOwner = "";
@@ -96,19 +108,18 @@ const LidOwn: string[] = (config.lidOwner ?? [])
     groupMetadata = await rrykarl.groupMetadata(chatJid).catch(() => ({}));
 
     groupOwner = groupMetadata?.owner
-      ? await rrykarl.decodeJid(groupMetadata.owner)
+      ? jidNormalizedUser(await rrykarl.decodeJid(groupMetadata.owner))
       : "";
 
     groupAdmins = await Promise.all(
       (groupMetadata?.participants ?? [])
         .filter((p: any) => p.admin === "admin" || p.admin === "superadmin")
         .map((p: any) => rrykarl.decodeJid(p.id))
-    );
+    ).then((ids) => ids.map((id) => jidNormalizedUser(id)));
 
     groupSubject = groupMetadata?.subject || "";
   }
 
-  //fkreply
   const fakethumb: Buffer = await getProfile(rrykarl, senderJid);
 
   const ftroli: proto.IWebMessageInfo = {
@@ -131,14 +142,11 @@ const LidOwn: string[] = (config.lidOwner ?? [])
     }
   };
 
-  const mentionedJid = msg?.contextInfo?.mentionedJid || [];
+  const mentionedJid = (msg?.contextInfo?.mentionedJid || []).map((j: string) =>
+    jidNormalizedUser(j)
+  );
 
-  const isBaileys =
-    typeof m.key.id === "string" &&
-    /^[0-9A-F]+$/i.test(m.key.id) &&
-    (m.key.id.startsWith("BAE5") ||
-      m.key.id.startsWith("3EB0") ||
-      m.key.id.length <= 24);
+  const isBaileys = detectBaileysId(m.key.id);
 
   const extended: ExtendedMessage = {
     chat: chatJid,
@@ -152,7 +160,9 @@ const LidOwn: string[] = (config.lidOwner ?? [])
       ? groupOwner === senderJid
       : false,
     isBotAdmins: isGroup
-      ? groupAdmins.includes(await rrykarl.decodeJid(rrykarl.user?.id || ""))
+      ? groupAdmins.includes(
+          jidNormalizedUser(await rrykarl.decodeJid(rrykarl.user?.id || ""))
+        )
       : false,
     pushName: m.pushName || undefined,
     message: m.message,
@@ -176,14 +186,19 @@ const LidOwn: string[] = (config.lidOwner ?? [])
           message: msg?.contextInfo?.quotedMessage,
           chat: chatJid,
           sender: msg?.contextInfo?.participant
-            ? await rrykarl.decodeJid(msg?.contextInfo?.participant)
+            ? jidNormalizedUser(
+                await rrykarl.decodeJid(msg?.contextInfo?.participant)
+              )
             : "",
           text: extractText(msg?.contextInfo?.quotedMessage),
           mtype: getContentType(msg?.contextInfo?.quotedMessage) || undefined,
           mediaType: MediaType(
             getContentType(msg?.contextInfo?.quotedMessage)
           ),
-          mentionedJid: msg?.contextInfo?.mentionedJid || [],
+          mentionedJid: (msg?.contextInfo?.mentionedJid || []).map((j: string) =>
+            jidNormalizedUser(j)
+          ),
+          isBaileys: detectBaileysId(msg?.contextInfo?.stanzaId),
           react: async (emoji?: string) => {
             const e =
               emoji ||
@@ -205,34 +220,36 @@ const LidOwn: string[] = (config.lidOwner ?? [])
     sendText: async (text: string) => {
       await rrykarl.sendMessage(chatJid, { text }, { quoted: m });
     },
-    
+
     reply: async (text: string, options: Record<string, any> = {}) => {
-  try {
-    const msgrep = {
-      text,
-      contextInfo: {
-        forwardingScore: 999,
-        isForwarded: true,
-        forwardedNewsletterMessageInfo: config.ch?.id ? {
-          newsletterName: config.ch.name,
-          newsletterJid: config.ch.id
-        } : undefined,
-        externalAdReply: {
-          title: config.ctx.title,
-          body: config.ctx.body,
-          thumbnailUrl: config.media.thumb,
-          thumbnail: Buffer.alloc(0),
-          sourceUrl: config.ch.link
-        }
-      },
-      ...options
-    };
-    return await rrykarl.sendMessage(chatJid, msgrep, { quoted: ftroli });
-  } catch (err) {
-    console.error("reply error:", err);
-  }
-},
-    
+      try {
+        const msgrep = {
+          text,
+          contextInfo: {
+            forwardingScore: 999,
+            isForwarded: true,
+            forwardedNewsletterMessageInfo: config.ch?.id
+              ? {
+                  newsletterName: config.ch.name,
+                  newsletterJid: config.ch.id
+                }
+              : undefined,
+            externalAdReply: {
+              title: config.ctx.title,
+              body: config.ctx.body,
+              thumbnailUrl: config.media.thumb,
+              thumbnail: Buffer.alloc(0),
+              sourceUrl: config.ch.link
+            }
+          },
+          ...options
+        };
+        return await rrykarl.sendMessage(chatJid, msgrep, { quoted: ftroli });
+      } catch (err) {
+        console.error("reply error:", err);
+      }
+    },
+
     react: async (emoji?: string) => {
       const e =
         emoji || config.emoji[Math.floor(Math.random() * config.emoji.length)];

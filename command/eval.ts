@@ -1,6 +1,7 @@
 import util from "util";
 import type { ExtendedMessage } from "./types";
 import { config } from "../config/config.ts";
+import { mess } from "../config/message.ts";
 
 export const evalPrefix = ["=>", ">", "$", "§"] as const;
 

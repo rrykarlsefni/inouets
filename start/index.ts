@@ -20,7 +20,6 @@ import { handleMessage } from "../handle/func.ts";
 import { HandleCase } from "../command/case.ts";
 import { runEval, evalPrefix } from "../command/eval.ts";
 import { config } from "../config/config.ts"
-
 const pkg = require("../package.json");
 ;
 
@@ -164,6 +163,17 @@ async function rrykarlStart() {
         }
         if (jid.endsWith("@lid")) {
           const pure = jid.replace(/@lid$/, "");
+
+          const mapFile = path.join("database", "mapping.json");
+          if (fs.existsSync(mapFile)) {
+            try {
+              const mapping = JSON.parse(fs.readFileSync(mapFile, "utf-8"));
+              if (mapping[jid]) {
+                return mapping[jid];
+              }
+            } catch {}
+          }
+
           try {
             const res = await rrykarl.lidToJid(pure);
             if (res) return await rrykarl.decodeJid(res);
@@ -188,9 +198,80 @@ async function rrykarlStart() {
       }
     };
 
+    async function syncLidReverseToMapping() {
+      try {
+        const sessionDir = SESS_DIR;
+        const outputDir = path.join(process.cwd(), "database");
+        const outputFile = path.join(outputDir, "mapping.json");
+
+        if (!fs.existsSync(sessionDir)) return;
+
+        if (!fs.existsSync(outputDir)) {
+          fs.mkdirSync(outputDir, { recursive: true });
+        }
+        if (!fs.existsSync(outputFile)) {
+          fs.writeFileSync(outputFile, JSON.stringify({}, null, 2));
+        }
+
+        const oldMappingRaw = fs.readFileSync(outputFile, "utf-8") || "{}";
+        let oldMapping: Record<string, string> = {};
+        try {
+          oldMapping = JSON.parse(oldMappingRaw);
+        } catch {
+          oldMapping = {};
+        }
+
+        const files = fs.readdirSync(sessionDir);
+        const reverseFiles = files.filter(f => f.startsWith("lid-mapping-") && f.endsWith("_reverse.json"));
+
+        for (const file of reverseFiles) {
+          try {
+            const lid = file.replace("lid-mapping-", "").replace("_reverse.json", "");
+            const filePath = path.join(sessionDir, file);
+            const raw = fs.readFileSync(filePath, "utf-8").trim();
+            let content = raw;
+            try {
+              const parsed = JSON.parse(raw);
+              if (typeof parsed === "string") {
+                content = parsed;
+              } else if (typeof parsed === "object" && parsed !== null) {
+                if (typeof parsed.id === "string" && parsed.id.trim()) {
+                  content = parsed.id;
+                } else {
+                  content = String(parsed);
+                }
+              } else {
+                content = String(parsed);
+              }
+            } catch {
+              content = raw.replace(/^"|"$/g, "").trim();
+            }
+
+            content = content.replace(/\D/g, "");
+            if (!content) continue;
+
+            const lidKey = `${lid}@lid`;
+            const jidVal = `${content}@s.whatsapp.net`;
+
+            if (!oldMapping[lidKey]) {
+              oldMapping[lidKey] = jidVal;
+            }
+          } catch (e) {
+          }
+        }
+
+        fs.writeFileSync(outputFile, JSON.stringify(oldMapping, null, 2));
+      } catch (e) {
+      }
+    }
+
     rrykarl.ev.on("creds.update", saveCreds);
 
-    rrykarl.ev.on("lid-mapping.update", (update) => {});
+    rrykarl.ev.on("lid-mapping.update", (update) => {
+      syncLidReverseToMapping().catch(() => {});
+    });
+
+    await syncLidReverseToMapping();
 
     if (!state.creds.registered) {
       (async () => {
@@ -274,37 +355,30 @@ async function rrykarlStart() {
     }
 
     rrykarl.ev.on("messages.upsert", async ({ type, messages }) => {
-      if (type !== "notify") return;
+  if (type !== "notify") return;
 
-      for (const raw of messages) {
-        try {
-          if (raw.key?.remoteJid === "status@broadcast") continue;
+  for (const raw of messages) {
+    try {
+      if (raw.key?.remoteJid === "status@broadcast") continue;
 
-          const m = await handleMessage(rrykarl, raw);
-          if (!m) continue;
-          if (!m.text && !m.quoted?.text) continue;
+      const m = await handleMessage(rrykarl, raw);
+      if (!m) continue;
+      if (!m.text && !m.quoted?.text) continue;
+      
+       if (m.isOwner && evalPrefix.some(p => m.text?.trim().startsWith(p))) {
+  await runEval(rrykarl, m, m.text?.trim());
+  continue;
+}
 
-          logMessage(m);
+      logMessage(m);
 
-          const text = m.text?.trim() || "";
-
-          if (evalPrefix.some(p => text.startsWith(p))) {
-            if (!m.isOwner) continue;
-            await runEval(rrykarl, m, text);
-            continue;
-          }
-
-          const prefix = config.prefix.find(p => text.startsWith(p));
-          if (!prefix) continue;
-
-          const command = text.slice(prefix.length).trim().split(/\s+/)[0].toLowerCase();
-          await HandleCase(rrykarl, m, command);
-        } catch (err) {
-          console.error("error message upsert:", err);
-        }
-      }
-    });
-
+      await HandleCase(rrykarl, m);
+    } catch (err) {
+      console.error("error message upsert:", err);
+    }
+  }
+});
+    
     rrykarl.ev.on("contacts.update", (updates) => {
       //console.log("Contacts updated:", updates);
     });
@@ -367,6 +441,10 @@ async function rrykarlStart() {
         });
       });
     }, 20 * 60 * 1000);
+
+    setInterval(() => {
+      syncLidReverseToMapping().catch(() => {});
+    }, 30 * 1000);
   } catch (err) {
     setTimeout(rrykarlStart, 5000);
   }

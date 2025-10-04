@@ -14,7 +14,7 @@ if ! command -v pkg >/dev/null 2>&1; then
 fi
 
 echo -e "${INFO}Menginstal dependensi...${RESET}"
-pkg install -y nodejs-lts git
+pkg install -y nodejs-lts git ffmpeg
 
 echo -e "${INFO}Menginstal package...${RESET}"
 npm install
